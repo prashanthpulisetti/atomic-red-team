@@ -21,27 +21,27 @@ atomic_tests:
   description: |
     Enumerates started system services using net.exe and writes them to a file. This technique has been used by multiple threat actors.
 
-    Upon successful execution, net.exe will run from cmd.exe that queries services. Expected output is to a txt file in c:\Windows\Temp\service-list.txt.s
+    Upon successful execution, net.exe will run from cmd.exe that queries services. Expected output is to a txt file in in the temp directory called service-list.txt.
   supported_platforms:
   - windows
   input_arguments:
     output_file:
       description: Path of file to hold net.exe output
-      type: Path
-      default: C:\Windows\Temp\service-list.txt
+      type: path
+      default: '%temp%\service-list.txt'
   executor:
     command: |
       net.exe start >> #{output_file}
     cleanup_command: |
       del /f /q /s #{output_file} >nul 2>&1
     name: command_prompt
-- name: System Service Discovery - systemctl
+- name: System Service Discovery - systemctl/service
   auto_generated_guid: f4b26bce-4c2c-46c0-bcc5-fce062d38bef
   description: |
-    Enumerates system service using systemctl
+    Enumerates system service using systemctl/service
   supported_platforms:
   - linux
   executor:
     command: |
-      systemctl --type=service
+      if [ "$(uname)" = 'FreeBSD' ]; then service -e; else systemctl --type=service; fi;
     name: bash

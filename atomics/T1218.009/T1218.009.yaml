@@ -10,24 +10,24 @@ atomic_tests:
   input_arguments:
     output_file:
       description: Location of the payload
-      type: Path
+      type: path
       default: '%tmp%\T1218.009.dll'
     source_file:
       description: Location of the CSharp source_file
-      type: Path
+      type: path
       default: PathToAtomicsFolder\T1218.009\src\T1218.009.cs
   dependency_executor_name: powershell
   dependencies:
   - description: |
       The CSharp source file must exist on disk at specified location (#{source_file})
     prereq_command: |
-      if (Test-Path #{source_file}) {exit 0} else {exit 1}
+      if (Test-Path "#{source_file}") {exit 0} else {exit 1}
     get_prereq_command: |
-      New-Item -Type Directory (split-path #{source_file}) -ErrorAction ignore | Out-Null
+      New-Item -Type Directory (split-path "#{source_file}") -ErrorAction ignore | Out-Null
       Invoke-WebRequest "https://github.com/redcanaryco/atomic-red-team/raw/master/atomics/T1218.009/src/T1218.009.cs" -OutFile "#{source_file}"
   executor:
     command: |
-      C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe /r:System.EnterpriseServices.dll /out:"#{output_file}" /target:library #{source_file}
+      C:\Windows\Microsoft.NET\Framework\v4.0.30319\csc.exe /r:System.EnterpriseServices.dll /out:"#{output_file}" /target:library "#{source_file}"
       C:\Windows\Microsoft.NET\Framework\v4.0.30319\regasm.exe /U #{output_file}
     cleanup_command: |
       del #{output_file} >nul 2>&1
@@ -42,20 +42,20 @@ atomic_tests:
   input_arguments:
     output_file:
       description: Location of the payload
-      type: Path
+      type: path
       default: $Env:TEMP\T1218.009.dll
     source_file:
       description: Location of the CSharp source_file
-      type: Path
+      type: path
       default: PathToAtomicsFolder\T1218.009\src\T1218.009.cs
   dependency_executor_name: powershell
   dependencies:
   - description: |
       The CSharp source file must exist on disk at specified location (#{source_file})
     prereq_command: |
-      if (Test-Path #{source_file}) {exit 0} else {exit 1}
+      if (Test-Path "#{source_file}") {exit 0} else {exit 1}
     get_prereq_command: |
-      New-Item -Type Directory (split-path #{source_file}) -ErrorAction ignore | Out-Null
+      New-Item -Type Directory (split-path "#{source_file}") -ErrorAction ignore | Out-Null
       Invoke-WebRequest "https://github.com/redcanaryco/atomic-red-team/raw/master/atomics/T1218.009/src/T1218.009.cs" -OutFile "#{source_file}"
   executor:
     command: |
@@ -71,4 +71,3 @@ atomic_tests:
       Remove-Item $parentpath\T1218.009.tlb -ErrorAction Ignore | Out-Null
     name: powershell
     elevation_required: true
-
